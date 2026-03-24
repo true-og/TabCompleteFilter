@@ -60,6 +60,7 @@ public class FileManager {
     Map<String, List<String>> groupData = new HashMap<>();
     CustomYML customYML = getYML("config");
     YamlConfiguration yaml = customYML.getFile();
+    if (!yaml.isConfigurationSection("groups")) return groupData;
 
     for (String key : yaml.getConfigurationSection("groups").getKeys(false)) {
       try {
@@ -75,6 +76,7 @@ public class FileManager {
     Map<String, CustomArgData> argData = new HashMap<>();
     CustomYML customYML = getYML("args");
     YamlConfiguration yaml = customYML.getFile();
+    if (!yaml.isConfigurationSection("custom-args")) return argData;
 
     for (String key : yaml.getConfigurationSection("custom-args").getKeys(false)) {
       try {
@@ -83,6 +85,7 @@ public class FileManager {
         String permission = yaml.getString(base + ".permission");
         String command = yaml.getString(base + ".command");
         Map<Integer, List<String>> args = new HashMap<>();
+        if (!yaml.isConfigurationSection(base + ".args")) continue;
         for (String argKey : yaml.getConfigurationSection(base + ".args").getKeys(false)) {
           int number = Integer.parseInt(argKey);
           List<String> numberArgs = yaml.getStringList(base + ".args." + argKey);
