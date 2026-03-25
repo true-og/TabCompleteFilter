@@ -5,6 +5,7 @@ import java.util.logging.Level;
 
 import dev.lee.tcf.TabCompleteFilter;
 import dev.lee.tcf.data.CustomArgData;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -60,8 +61,11 @@ public class FileManager {
     Map<String, List<String>> groupData = new HashMap<>();
     CustomYML customYML = getYML("config");
     YamlConfiguration yaml = customYML.getFile();
+    ConfigurationSection groupsSection = yaml.getConfigurationSection("groups");
 
-    for (String key : yaml.getConfigurationSection("groups").getKeys(false)) {
+    if (groupsSection == null) return groupData;
+
+    for (String key : groupsSection.getKeys(false)) {
       try {
         groupData.put(key, yaml.getStringList("groups." + key));
       } catch (Exception e) {
@@ -75,15 +79,24 @@ public class FileManager {
     Map<String, CustomArgData> argData = new HashMap<>();
     CustomYML customYML = getYML("args");
     YamlConfiguration yaml = customYML.getFile();
+    ConfigurationSection customArgsSection = yaml.getConfigurationSection("custom-args");
 
-    for (String key : yaml.getConfigurationSection("custom-args").getKeys(false)) {
+    if (customArgsSection == null) return argData;
+
+    for (String key : customArgsSection.getKeys(false)) {
       try {
         String base = "custom-args." + key;
         boolean permissionCheck = yaml.getBoolean(base + ".permission-check");
         String permission = yaml.getString(base + ".permission");
         String command = yaml.getString(base + ".command");
         Map<Integer, List<String>> args = new HashMap<>();
-        for (String argKey : yaml.getConfigurationSection(base + ".args").getKeys(false)) {
+        ConfigurationSection argsSection = yaml.getConfigurationSection(base + ".args");
+
+        if (argsSection == null || command == null || command.isBlank()) {
+          continue;
+        }
+
+        for (String argKey : argsSection.getKeys(false)) {
           int number = Integer.parseInt(argKey);
           List<String> numberArgs = yaml.getStringList(base + ".args." + argKey);
           args.put(number, numberArgs);

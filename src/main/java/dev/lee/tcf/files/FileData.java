@@ -32,6 +32,7 @@ public class FileData {
       if (yaml.contains(config.getPath())) continue;
       yaml.set(config.getPath(), config.getObject());
     }
+    ensureSection(yaml, "groups");
     customYML.saveFile();
     TabCompleteFilter.getInstance().getTabManager().getGroupDataMap().clear();
 
@@ -63,11 +64,18 @@ public class FileData {
       if (yaml.contains(args.getPath())) continue;
       yaml.set(args.getPath(), args.getObject());
     }
+    ensureSection(yaml, "custom-args");
     customYML.saveFile();
     TabCompleteFilter.getInstance().getTabManager().getCustomArgDataMap().clear();
 
     for (Map.Entry<String, CustomArgData> argData : fileManager.getAllCustomArgData().entrySet()) {
       TabCompleteFilter.getInstance().getTabManager().addCustomArgData(argData.getKey(), argData.getValue());
+    }
+  }
+
+  private void ensureSection(YamlConfiguration yaml, String path) {
+    if (yaml.getConfigurationSection(path) == null) {
+      yaml.createSection(path);
     }
   }
 }
