@@ -1,24 +1,236 @@
-# Groups - Permission group for tcf.{group} (ex: tcf.default)
-# List of registered commands that will show in tab complete for group
-# The user will also need the perm for the command itself
-op-player-filter-bypass: false
+# ============================================================================
+#  TabCompleteFilter — TRUE-OG config (built from live LuckPerms export)
+# ----------------------------------------------------------------------------
+#  HOW IT WORKS:
+#   - WHITELIST. PlayerCommandSendEvent clears all tab commands, then re-adds
+#     only those listed for the tcf groups the player has.
+#   - A group "x" applies to a player who has permission  tcf.x
+#   - !! No tcf.<group> perm = ZERO tab completions. Everyone needs tcf.default.
+#   - Groups STACK. We exploit LuckPerms RANK INHERITANCE: attach one tcf node
+#     at each rank group; higher ranks inherit the lower tcf.* nodes, so each
+#     command is listed ONCE at the tier that first grants its permission.
+#   - Visibility only. Players still need the command's own perm to run it.
+#     These lists were pruned to the perms each rank actually has.
+#   - WorldEdit "//" commands: written with two slashes; plugin strips one.
+#
+#  Your rank chain (each inherits the previous):
+#   default -> og -> og-pro -> og-master -> tester -> youtube
+#           -> helper -> builder -> moderator -> admin
+#
+#  LUCKPERMS SETUP (run once; inheritance handles the rest):
+#     /lp group default   permission set tcf.default   true
+#     /lp group og        permission set tcf.og        true
+#     /lp group og-pro    permission set tcf.ogpro     true
+#     /lp group og-master permission set tcf.ogmaster  true
+#     /lp group helper    permission set tcf.helper    true
+#     /lp group builder   permission set tcf.builder   true
+#     /lp group moderator permission set tcf.moderator true
+#     /lp group admin     permission set tcf.bypass    true   # admin sees ALL
+#
+#  NOTE: tester/youtube grant no NEW root commands (cosmetic/subcommand
+#  perms only), so they get no tcf group — they inherit the tiers below.
+# ============================================================================
+
+# Admins use tcf.bypass (above). Leave OP bypass on as a safety net.
+op-player-filter-bypass: true
+
 groups:
+
+  # --------------------------------------------------------------------------
+  # default — every player (group.default). Baseline from default-rank perms.
+  # --------------------------------------------------------------------------
   default:
-    - /help
-    - /msg
-    - /r
-    - /tell
-    - /tpa
-    - /tpaaccept
-    - /back
-    - /rules
-    - /afk
-    - /baltop
-    - /mail
-    - /stats
-    - /shop
-  mod:
-    - /ban
-    - /kick
-    - /mute
-    - //calculate
+    # info / help
+    - /help            # essentials.help
+    - /list            # essentials.list
+    - /rules           # essentials.rules
+    - /ranks           # utilities.ranks
+    - /ping            # utilities.ping
+    - /firstplayed     # firstplayed.*
+    - /playtime        # pt.use
+    - /topplaytime     # pt.top
+    - /uptime          # pt.uptime
+    - /togglephantoms  # utilities.togglephantoms
+    - /togglescoreboard
+    - /cleanupin       # nodespawnog.cleanupin
+    # communication
+    - /msg             # essentials.msg
+    - /r               # essentials.r
+    - /mail            # essentials.mail
+    - /ignore          # essentials.ignore
+    # teleport / homes
+    - /spawn           # essentials.spawn
+    - /home            # essentials.home
+    - /sethome         # essentials.sethome(.multiple)
+    - /delhome         # essentials.delhome
+    - /tpa             # essentials.tpa
+    - /tpaccept        # essentials.tpaccept
+    - /tpdeny          # essentials.tpdeny
+    - /tpacancel       # essentials.tpacancel
+    - /suicide         # essentials.suicide
+    # economy (DiamondBank)
+    - /balance         # diamondbank-og.balance
+    - /baltop          # diamondbank-og.balancetop
+    - /pay             # diamondbank-og.pay
+    - /deposit         # diamondbank-og.deposit
+    - /withdraw        # diamondbank-og.withdraw
+    - /compress        # diamondbank-og.compress
+    # shops
+    - /qs              # quickshop.create.* / use
+    - /find            # quickshop.find + finditem.use
+    # bounties
+    - /bounty          # bountyhunters.*
+    # minigames (own perms, default-true — not in LP export)
+    - /duel            # duels.queue/stats/toggle
+    - /spectate        # duels.spectate
+    - /queue           # duels.queue
+    - /splegg
+    - /spleef
+    - /buildbattle
+    - /battlearena
+    - /hub
+    - /plugins
+    - /tps
+    # voting (VotingPlugin defaults — not in LP export)
+    - /vote
+    - /votetop
+    - /voteparty
+    - /voteurl
+    - /votehelp
+    - /votepoints
+    - /voteshop
+    - /votestreak
+    - /votegui
+
+  # --------------------------------------------------------------------------
+  # og — first donor tier (group og). Premium chat.
+  # --------------------------------------------------------------------------
+  og:
+    - /p               # chat-og.donors (premium chat)
+
+  # --------------------------------------------------------------------------
+  # ogpro — donor (group og-pro). New player commands unlocked at this rank.
+  # --------------------------------------------------------------------------
+  ogpro:
+    - /sit             # betterchairs.cmd.sit
+    - /togglechairs    # betterchairs.cmd.toggle
+    - /hat             # essentials.hat
+    - /enderchest      # essentials.enderchest
+    - /editsign        # essentials.editsign
+    - /cosmetics       # particlehats.command.h/help
+    - /petm            # petmaster.setcolor
+
+  # --------------------------------------------------------------------------
+  # ogmaster — top donor (group og-master).
+  # --------------------------------------------------------------------------
+  ogmaster:
+    - /back            # essentials.back
+    - /tdc             # toggledeathcoordinates.use
+
+  # --------------------------------------------------------------------------
+  # helper — staff entry (group helper).
+  # --------------------------------------------------------------------------
+  helper:
+    - /gamemode        # essentials.gamemode + minecraft.command.gamemode
+    - /gmc
+    - /gms
+    - /gma
+    - /gmsp
+    - /co              # coreprotect.lookup.* / rollback
+    - /tp              # essentials.tp
+    - /skull           # essentials.skull
+    - /weather         # essentials.weather
+    - /noclip          # noclip.use
+    - /launchpad       # launchpad.can*
+    - /imageframe      # images.command
+    - /worldeditsui    # wesui.command
+    - /flyingbow       # flyingbow.cangive
+    - /region          # worldguard.region.select / toggle-bypass
+    - /kick            # staffog.command.kick
+    - /tempban         # staffog.command.tempban
+    - /tempmute        # staffog.command.tempmute
+    - /linkpanel       # staffog.panelaccess
+    - /chatreport      # staffog.isstaff
+    # WorldEdit navigation (helper-granted)
+    - /ascend          # worldedit.navigation.ascend
+    - /descend         # worldedit.navigation.descend
+    - /jumpto          # worldedit.navigation.jumpto.command
+    - /thru            # worldedit.navigation.thru.command
+    - /up              # worldedit.navigation.up
+
+  # --------------------------------------------------------------------------
+  # builder — build team (group builder). Full WorldEdit.
+  # --------------------------------------------------------------------------
+  builder:
+    - /worldedit       # worldedit.* (subset granted)
+    - //wand
+    - //set
+    - //replace
+    - //copy
+    - //cut
+    - //paste
+    - //undo
+    - //redo
+    - //pos1
+    - //pos2
+    - //hpos1
+    - //hpos2
+    - //expand
+    - //contract
+    - //stack
+    - //move
+    - //rotate
+    - //flip
+    - //calc
+    - //fill
+    - //drain
+    - //fixwater
+    - //fixlava
+    - //regen
+    - //removenear
+    - //drawsel
+    - //listchunks
+    - /brush           # worldedit.brush.*
+    - /schematic       # worldedit.schematic.*
+    - //snapshot       # worldedit.snapshots.*
+    - /toggleeditwand  # worldedit.wand.toggle
+    - /holograms       # holograms.command
+
+  # --------------------------------------------------------------------------
+  # moderator — full mod toolkit (group moderator).
+  # --------------------------------------------------------------------------
+  moderator:
+    # punishments
+    - /ban             # essentials.ban
+    - /banip           # essentials.banip
+    - /tempban         # essentials.tempban
+    - /mute            # essentials.mute
+    - /permban         # staffog.command.permban
+    - /permmute        # staffog.command.permmute
+    # player management / inspection
+    - /me              # essentials.me
+    - /seen            # essentials.seen.*
+    - /whois           # essentials.whois
+    - /world           # essentials.world
+    - /gc              # essentials.gc
+    - /broadcast       # essentials.broadcast
+    - /feed            # essentials.feed
+    - /fly             # essentials.fly
+    - /enchant         # essentials.enchant
+    - /give            # essentials.give + minecraft.command.give
+    - /clearinventory  # essentials.clearinventory.others
+    - /vanish          # essentials.vanish
+    - /tellraw         # minecraft.command.tellraw
+    # inventory / containers
+    - /openinv         # openinv.*
+    - /openender
+    - /searchinv
+    - /searchender
+    # admin-grade plugin tools
+    - /luckperms       # luckperms.*
+    - /papi            # placeholderapi.*
+    - /oldcombatmechanics  # oldcombatmechanics.*
+    - /worldguard      # worldguardgui.* / region.define/list/remove
+    # TheHerobrine event control
+    - /hbdropshard     # theherobrine.command.dropshard
+    - /hbforcestart    # theherobrine.command.forcestart
